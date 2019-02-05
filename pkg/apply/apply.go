@@ -10,6 +10,9 @@ import (
 	"os"
 )
 
+/**
+	Application request structure
+ */
 type Application struct {
 	Name string
 	Email string
@@ -29,7 +32,6 @@ func (app *Application) Apply() {
 	if err != nil {
 		log.Fatalln("apply.Apply(): Unable to convert application to JSON...")
 	}
-	log.Println("apply.Apply(): Raw JSON is: ", string(rawJson))
 
 	resp, err := http.Post(_PLAID_ENDPOINT, "application/json", bytes.NewBuffer(rawJson))
 	if err != nil {
@@ -39,11 +41,14 @@ func (app *Application) Apply() {
 	log.Println("apply.APply(): Response status code is: ", resp.Status)
 }
 
+/**
+	Scan field values in from standard input
+	by prompting the user with the field name
+ */
 func scanFields(s []string) ScanMap {
 	scanMap := make(ScanMap)
 	scanner := bufio.NewScanner(os.Stdin)
 
-//	log.Println("ScanNext(): About to scan text...")
 	for i := 0; i < len(s); i++ {
 		fmt.Printf("%s: ", s[i])
 
@@ -53,7 +58,6 @@ func scanFields(s []string) ScanMap {
 
 		scanMap[s[i]] = scanner.Text()
 	}
-//	log.Println("ScanNext(): Done scanning...")
 
 	if err := scanner.Err(); err != nil {
 		log.Fatalln("Apply.scanNext(): Unable to scan due to: ", err)
@@ -61,6 +65,13 @@ func scanFields(s []string) ScanMap {
 
 	return scanMap
 }
+
+/**
+	Load the application request structure
+	by initializing a map of field names
+	to values and assigning the appropriate
+	values to application structure members
+ */
 func loadApplication() *Application {
 	res := new(Application)
 	fields := []string{
@@ -69,23 +80,18 @@ func loadApplication() *Application {
 
 	scanMap := scanFields(fields)
 
-/*	for k , v := range scanMap {
-		log.Println(k, ": ", v)
-	}
-*/
 	res.Name = scanMap["name"]
 	res.Email = scanMap["email"]
 	res.Resume = scanMap["resume"]
 	res.Github = scanMap["github"]
 
-//	log.Println("Resulting APplication object is: ", res)
-
 	return res
 }
 
+/**
+	Create simply loads application structure
+ */
 func Create() *Application {
-	log.Println("Apply.Create():")
-
 	res := loadApplication()
 
 	return res
