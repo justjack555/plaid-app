@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -14,10 +15,10 @@ import (
 	Application request structure
  */
 type Application struct {
-	Name string
-	Email string
-	Resume string
-	Github string
+	Name string `json:"name"`
+	Email string `json:"email"`
+	Resume string `json:"resume"`
+	Github string `json:"github"`
 }
 
 type ScanMap map[string]string
@@ -37,8 +38,14 @@ func (app *Application) Apply() {
 	if err != nil {
 		log.Fatalln("apply.Apply(): Unable to post request to Plaid")
 	}
+	defer resp.Body.Close()
 
-	log.Println("apply.APply(): Response status code is: ", resp.Status)
+	b, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatalln("apply.Apply(): Error reading response into byte array...")
+	}
+
+	log.Println("apply.Apply(): Response status code is: ", resp.Status, ", while body is: ", string(b))
 }
 
 /**
